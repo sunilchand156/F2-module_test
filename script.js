@@ -1,47 +1,74 @@
-window.addEventListener("load", getMenu);
-async function getMenu(){
-    try{
-        const response = await fetch(`https://raw.githubusercontent.com/saksham-accio/f2_contest_3/main/food.json`);
-        let data = await response.json();
-        console.log("Menu-data: ", data);
-        startProcess();
-    }catch(error){
-        console.log('cannot read the data... ', error);
+// create a function getMenu() and fetching the restraunt menu details...
+async function getMenu() {
+    await fetch(`https://raw.githubusercontent.com/saksham-accio/f2_contest_3/main/food.json`)
+        .then(response => response.json())
+        .then(data => {
+            // Display the menu items on the webpage
+            const menu = document.getElementById("menu-container");
+            data.forEach(item => {
+                const menuItem = document.createElement("div");
+                menuItem.innerHTML = `
+                        <img src="${item.imgSrc}" alt="menuImage">
+                        <h3>${item.name}</h3>
+                        <p><b>Price:</b> ${item.price}</p>
+                        `;
+                menu.appendChild(menuItem);
+            });
+            console.log(data);
+        })
+        .catch(error => console.error(error));
+}
+
+function takeOrder() {
+    return new Promise(resolve => {
+        setTimeout(() => {
+            // Randomly select three burgers from the menu
+            const burgers = ["Classic Burger", "Cheeseburger", "Bacon Burger"];
+            const order = burgers.sort(() => 0.5 - Math.random()).slice(0, 3);
+            resolve(order);
+        }, 2500);
+    });
+}
+
+// Prepare a order and set order status: tru; and paid false...
+function orderPrep() {
+    return new Promise(resolve => {
+        setTimeout(() => {
+            resolve({ order_status: true, paid: false });
+        }, 1500);
+    });
+}
+
+// After that payment process start and paid set true...
+function payOrder() {
+    return new Promise(resolve => {
+        setTimeout(() => {
+            resolve({ order_status: true, paid: true });
+        }, 1000);
+    });
+}
+
+// after successfully payment complition alert the message ...
+function thankyouFnc() {
+    alert("Thank you for eating with us today!");
+}
+
+async function orderProcess() {
+    try {
+        await getMenu();
+        const order = await takeOrder();
+        console.log("Order:", order);
+        const orderStatus = await orderPrep();
+        console.log("Order Status:", orderStatus);
+        const paidStatus = await payOrder();
+        console.log("Paid Status:", paidStatus);
+        if (paidStatus.paid) {
+            thankyouFnc();
+        }
+    } catch (error) {
+        console.error(error);
     }
 }
- // user ordering and adding three burgers in the object
- function takeOrder(){
-    return new Promise((resolve, reject)=>{
-        setTimeout(()=>resolve({"order1" : "veg Burger", "order2" : "Chicken chowmin Burger", "order3":"Burger schezwan"}), 2500);
-    });
-}
 
- // function for showing order is preparing
- function orderPrep(){
-    return new Promise((resolve, reject)=>{
-        setTimeout(()=>resolve({"order_status":true, "paid":false}), 1500);
-    });
-}
-
-// function showing status for paying order
-function payOrder(){
-    return new Promise((resolve, reject)=>{
-        setTimeout(()=>resolve({"order_status":true, "paid":true}), 1000);
-    });
-}
-
-// function for showing thank messages
-function thankyouFnc(){
-    alert(" Thank-you for visiting today !");
-}
-
-
-async function startProcess(){
-    let order =  await takeOrder();
-    console.log("order : ", order);
-    let prepStatus = await orderPrep();
-    console.log("orderStatus : ", prepStatus);
-    let paymentStatus = await payOrder();
-    console.log("paymentStatus : ", paymentStatus);
-    thankyouFnc();
-}
+// Call the orderProcess function to start the order process
+orderProcess();
